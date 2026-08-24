@@ -69,13 +69,13 @@ const inspector = useSidebar("inspector")
 
 `<SidebarProvider>`
 
-| Prop | Default | |
-| --- | --- | --- |
-| `sidebars` | — | Named sidebars. Omit for a single default one. |
-| `defaultOpen` | `true` | State before a visitor has toggled anything. A boolean, or a record per id. |
-| `storageKey` | `"sidebars"` | localStorage key. |
-| `attribute` | `"data-sidebar"` | Attribute set on `<html>`. |
-| `nonce` | — | CSP nonce for the inline script. |
+| Prop          | Default          |                                                                             |
+| ------------- | ---------------- | --------------------------------------------------------------------------- |
+| `sidebars`    | —                | Named sidebars. Omit for a single default one.                              |
+| `defaultOpen` | `true`           | State before a visitor has toggled anything. A boolean, or a record per id. |
+| `storageKey`  | `"sidebars"`     | localStorage key.                                                           |
+| `attribute`   | `"data-sidebar"` | Attribute set on `<html>`.                                                  |
+| `nonce`       | —                | CSP nonce for the inline script.                                            |
 
 `useSidebar(id?)` returns `{ open, setOpen, toggle }`. The `id` is only needed when several sidebars are declared. Changes persist and sync to other tabs.
 
