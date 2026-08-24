@@ -6,6 +6,9 @@ on:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
+permissions:
+  contents: read
+
 jobs:
   select-mode:
     runs-on: ubuntu-latest
@@ -13,13 +16,13 @@ jobs:
       mode: ${{ steps.select.outputs.mode }}
       publish-plan-artifact-id: ${{ steps.select.outputs.publish-plan-artifact-id }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           version: 11
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
@@ -35,11 +38,11 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
         with:
           version: 11
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
@@ -56,15 +59,18 @@ jobs:
       contents: write # git tags + GitHub releases
       id-token: write # npm trusted publishing (OIDC)
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
         with:
           version: 11
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Publishing is not gated on the CI workflow, so re-check everything here.
+      - run: pnpm fmt:check
+      - run: pnpm lint
       - run: pnpm exec tsc --noEmit
       - run: pnpm build
       - uses: changesets/action/pack@v2
