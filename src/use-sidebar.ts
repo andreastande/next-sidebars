@@ -25,11 +25,17 @@ export function useSidebar(id?: string): UseSidebarReturn {
   }
 
   const resolved = id ?? ctx.ids[0]!
-  const open = ctx.openMap[resolved] !== false
-  const { setOpen: ctxSetOpen, toggle: ctxToggle } = ctx
+  const { store } = ctx
 
-  const setOpen = React.useCallback((next: boolean) => ctxSetOpen(resolved, next), [ctxSetOpen, resolved])
-  const toggle = React.useCallback(() => ctxToggle(resolved), [ctxToggle, resolved])
+  // Subscribes to this sidebar alone: toggling another one doesn't re-render.
+  const open = React.useSyncExternalStore(
+    store.subscribe,
+    () => store.getSnapshot()[resolved] !== false,
+    () => store.getServerSnapshot()[resolved] !== false,
+  )
+
+  const setOpen = React.useCallback((next: boolean) => store.setOpen(resolved, next), [store, resolved])
+  const toggle = React.useCallback(() => store.toggle(resolved), [store, resolved])
 
   return React.useMemo(() => ({ open, setOpen, toggle }), [open, setOpen, toggle])
 }
