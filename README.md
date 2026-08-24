@@ -34,7 +34,7 @@ The provider keeps a `data-sidebar` attribute on `<html>`, set to `"open"` or `"
 Or in plain CSS: `html[data-sidebar="closed"] aside { width: 4rem }`. If you'd rather write `sidebar-closed:w-16`, define a variant in your own CSS:
 
 ```css
-@custom-variant sidebar-closed (html[data-sidebar="closed"] &);
+@custom-variant sidebar-closed (&:where(html[data-sidebar="closed"] *));
 ```
 
 Read and change the state from any client component:
