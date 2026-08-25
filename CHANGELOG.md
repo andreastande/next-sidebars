@@ -1,5 +1,11 @@
 # next-sidebars
 
+## 0.1.4
+
+### Patch Changes
+
+- [`69e735b`](https://github.com/andreastande/next-sidebars/commit/69e735b4cade7c0ad4bbcaff0185d1d744424c35) Thanks [@andreastande](https://github.com/andreastande)! - Ignore `storage` events from sessionStorage: a same-origin window writing sessionStorage under the same key no longer alters sidebar state.
+
 ## 0.1.3
 
 ### Patch Changes
