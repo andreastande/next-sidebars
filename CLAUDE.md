@@ -8,10 +8,10 @@ it was written. It describes the code as it stands — never what was removed or
 how it got here. JSDoc is held to the same bar, from the consumer's chair:
 only what they can act on. When in doubt, delete.
 
-## Formatting and linting
+## Checks
 
-Run before every commit, then stage — `pnpm fmt` rewrites in place, so `git add`
-anything already staged again:
+Don't run these by hand — a hook runs them on every commit and blocks on
+failure:
 
 ```bash
 pnpm fmt && pnpm lint && pnpm exec tsc --noEmit && pnpm build
