@@ -46,9 +46,10 @@ export function createStore(defaults: Record<string, boolean>, storageKey: strin
     for (const listener of listeners) listener()
   }
 
-  // "storage" fires only in other tabs: cross-tab sync with no same-tab echo.
+  // "storage" fires only in other tabs (no same-tab echo), but for
+  // sessionStorage writes too — hence the storageArea check.
   const onStorage = (e: StorageEvent) => {
-    if (e.key !== storageKey || e.newValue === null) return
+    if (e.key !== storageKey || e.newValue === null || e.storageArea !== window.localStorage) return
     const next = mergeStored(snapshot, parseStored(e.newValue))
     if (next === snapshot) return
     snapshot = next
