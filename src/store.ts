@@ -57,9 +57,15 @@ export function createStore(defaults: Record<string, boolean>, storageKey: strin
 
   const setOpen = (id: string, open: boolean) => {
     if (snapshot[id] === open) return
-    snapshot = { ...snapshot, [id]: open }
+    let stored: Record<string, unknown> = {}
     try {
-      window.localStorage.setItem(storageKey, JSON.stringify(snapshot))
+      stored = parseStored(window.localStorage.getItem(storageKey))
+    } catch {}
+    // The snapshot may have missed storage events, so storage stays the
+    // authority for every id but the toggled one.
+    snapshot = { ...mergeStored(snapshot, stored), [id]: open }
+    try {
+      window.localStorage.setItem(storageKey, JSON.stringify({ ...stored, [id]: open }))
     } catch {
       // Without storage the state just stops surviving reloads.
     }

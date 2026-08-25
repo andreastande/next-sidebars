@@ -82,7 +82,7 @@ const inspector = useSidebar("inspector")
 ## Notes
 
 - Prefer styling off the attribute: it's correct before first paint, while JSX branching on `open` settles just after hydration. Both hydrate cleanly.
-- Without JavaScript, on a first visit, or with broken storage, you get `defaultOpen`.
+- On a first visit or with broken storage, you get `defaultOpen`. Without JavaScript the attribute is only ever what your `<html>` hardcodes.
 - Props are read at mount. One provider per app.
 
 ## License
