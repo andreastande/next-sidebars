@@ -1,5 +1,11 @@
 # next-sidebars
 
+## 0.1.3
+
+### Patch Changes
+
+- [`e981608`](https://github.com/andreastande/next-sidebars/commit/e98160812205404b73883cc0b27abe6cfcb107d0) Thanks [@andreastande](https://github.com/andreastande)! - Fix a toggle in a tab with stale state reverting other sidebars everywhere: `setOpen` now merges stored state before writing and persists only the toggled id. A side effect is that `defaultOpen` changes keep applying to sidebars a visitor never toggled.
+
 ## 0.1.2
 
 ### Patch Changes
