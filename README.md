@@ -87,7 +87,6 @@ import { useEffect } from "react"
 export function MobileSidebar({ children }: { children: React.ReactNode }) {
   const { open, setOpen } = useSidebar("mobile")
   const pathname = usePathname()
-
   useEffect(() => setOpen(false), [pathname, setOpen]) // close when a link navigates
 
   return (
@@ -97,6 +96,26 @@ export function MobileSidebar({ children }: { children: React.ReactNode }) {
   )
 }
 ```
+
+## Keyboard shortcut
+
+The package doesn't bind keys itself. `toggle` is a stable function, so hand it to whatever hotkeys library your app already uses — with [TanStack Hotkeys](https://tanstack.com/hotkeys):
+
+```tsx
+"use client"
+
+import { useSidebar } from "next-sidebars"
+import { useHotkey } from "@tanstack/react-hotkeys"
+
+export function SidebarShortcut() {
+  const { toggle } = useSidebar()
+  useHotkey("Mod+B", toggle) // ⌘B on macOS, Ctrl+B elsewhere
+
+  return null
+}
+```
+
+Or with [react-hotkeys-hook](https://react-hotkeys-hook.vercel.app): `useHotkeys("mod+b", toggle, { preventDefault: true, enableOnFormTags: true })`.
 
 ## API
 
