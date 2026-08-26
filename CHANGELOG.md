@@ -1,5 +1,11 @@
 # next-sidebars
 
+## 0.2.0
+
+### Minor Changes
+
+- [`de4c8f8`](https://github.com/andreastande/next-sidebars/commit/de4c8f825b7988da9bdbfd094e9961ed3eea93dc) Thanks [@andreastande](https://github.com/andreastande)! - Add a `persist` prop to opt sidebars out of localStorage persistence. An ephemeral sidebar always loads as `defaultOpen` — right for mobile overlay sidebars, which shouldn't reopen on reload.
+
 ## 0.1.4
 
 ### Patch Changes
