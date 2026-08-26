@@ -9,6 +9,7 @@ export function initSidebars(
   storageKey: string,
   defaults: Record<string, boolean>,
   attributes: Record<string, string>,
+  persisted: Record<string, boolean>,
 ): void {
   try {
     let stored: Record<string, unknown> = {}
@@ -17,7 +18,7 @@ export function initSidebars(
       if (typeof parsed === "object" && parsed !== null) stored = parsed as Record<string, unknown>
     } catch {}
     for (const id in attributes) {
-      const v = stored[id]
+      const v = persisted[id] ? stored[id] : undefined
       const open = typeof v === "boolean" ? v : defaults[id] !== false
       document.documentElement.setAttribute(attributes[id]!, open ? "open" : "closed")
     }

@@ -28,23 +28,27 @@ export const SidebarContext: React.Context<SidebarContextValue | null> =
  * ```
  */
 export function SidebarProvider(props: SidebarProviderProps): React.JSX.Element {
-  const { children, sidebars, defaultOpen, storageKey = "sidebars", attribute = "data-sidebar", nonce } = props
+  const { children, sidebars, defaultOpen, persist, storageKey = "sidebars", attribute = "data-sidebar", nonce } = props
 
   const config = React.useMemo(() => {
     const ids: readonly string[] = sidebars ?? [DEFAULT_ID]
     const defaults: Record<string, boolean> = {}
     const attrs: Record<string, string> = {}
+    const persisted: Record<string, boolean> = {}
     for (const id of ids) {
       defaults[id] = typeof defaultOpen === "boolean" ? defaultOpen : (defaultOpen?.[id] ?? true)
       attrs[id] = sidebars ? `${attribute}-${id}` : attribute
+      persisted[id] = typeof persist === "boolean" ? persist : (persist?.[id] ?? true)
     }
     // Escape "<" so consumer-provided ids/keys can never close the script tag.
-    const args = [storageKey, defaults, attrs].map((arg) => JSON.stringify(arg).replace(/</g, "\\u003c")).join(",")
-    return { ids, defaults, attrs, scriptHtml: `(${initSidebars.toString()})(${args})` }
+    const args = [storageKey, defaults, attrs, persisted]
+      .map((arg) => JSON.stringify(arg).replace(/</g, "\\u003c"))
+      .join(",")
+    return { ids, defaults, attrs, persisted, scriptHtml: `(${initSidebars.toString()})(${args})` }
     // oxlint-disable-next-line react-hooks/exhaustive-deps -- keyed by content, not identity
-  }, [JSON.stringify(sidebars), JSON.stringify(defaultOpen), storageKey, attribute])
+  }, [JSON.stringify(sidebars), JSON.stringify(defaultOpen), JSON.stringify(persist), storageKey, attribute])
 
-  const store = React.useMemo(() => createStore(config.defaults, storageKey), [config, storageKey])
+  const store = React.useMemo(() => createStore(config.defaults, storageKey, config.persisted), [config, storageKey])
 
   // The blocking script stamped these pre-paint; this keeps them in step with
   // the store. Rendered state would briefly stamp `defaultOpen` at hydration.

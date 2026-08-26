@@ -16,9 +16,16 @@ function parseStored(json: string | null): Record<string, unknown> {
 }
 
 // Returns `base` itself when nothing differs, so callers can bail out.
-function mergeStored(base: Record<string, boolean>, stored: Record<string, unknown>): Record<string, boolean> {
+// Ephemeral ids never merge: stale values (an older version, another tab)
+// may still sit under the key.
+function mergeStored(
+  base: Record<string, boolean>,
+  stored: Record<string, unknown>,
+  persisted: Record<string, boolean>,
+): Record<string, boolean> {
   let out = base
   for (const id in base) {
+    if (!persisted[id]) continue
     const v = stored[id]
     if (typeof v === "boolean" && v !== base[id]) {
       if (out === base) out = { ...base }
@@ -33,11 +40,15 @@ function mergeStored(base: Record<string, boolean>, stored: Record<string, unkno
  * hydration can never mismatch; the stored state lands in the re-render
  * React schedules right after.
  */
-export function createStore(defaults: Record<string, boolean>, storageKey: string): SidebarStore {
+export function createStore(
+  defaults: Record<string, boolean>,
+  storageKey: string,
+  persisted: Record<string, boolean>,
+): SidebarStore {
   let snapshot = defaults
   if (typeof window !== "undefined") {
     try {
-      snapshot = mergeStored(defaults, parseStored(window.localStorage.getItem(storageKey)))
+      snapshot = mergeStored(defaults, parseStored(window.localStorage.getItem(storageKey)), persisted)
     } catch {}
   }
 
@@ -50,7 +61,7 @@ export function createStore(defaults: Record<string, boolean>, storageKey: strin
   // sessionStorage writes too — hence the storageArea check.
   const onStorage = (e: StorageEvent) => {
     if (e.key !== storageKey || e.newValue === null || e.storageArea !== window.localStorage) return
-    const next = mergeStored(snapshot, parseStored(e.newValue))
+    const next = mergeStored(snapshot, parseStored(e.newValue), persisted)
     if (next === snapshot) return
     snapshot = next
     emit()
@@ -64,11 +75,13 @@ export function createStore(defaults: Record<string, boolean>, storageKey: strin
     } catch {}
     // The snapshot may have missed storage events, so storage stays the
     // authority for every id but the toggled one.
-    snapshot = { ...mergeStored(snapshot, stored), [id]: open }
-    try {
-      window.localStorage.setItem(storageKey, JSON.stringify({ ...stored, [id]: open }))
-    } catch {
-      // Without storage the state just stops surviving reloads.
+    snapshot = { ...mergeStored(snapshot, stored, persisted), [id]: open }
+    if (persisted[id]) {
+      try {
+        window.localStorage.setItem(storageKey, JSON.stringify({ ...stored, [id]: open }))
+      } catch {
+        // Without storage the state just stops surviving reloads.
+      }
     }
     emit()
   }

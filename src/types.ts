@@ -15,6 +15,13 @@ export interface SidebarProviderProps {
    */
   defaultOpen?: boolean | Record<string, boolean>
   /**
+   * Whether toggles persist to localStorage: a boolean for every sidebar,
+   * or a record per id (unlisted ids persist). An ephemeral sidebar always
+   * loads as `defaultOpen` — right for mobile overlays, which shouldn't
+   * reopen on reload. Defaults to `true`.
+   */
+  persist?: boolean | Record<string, boolean>
+  /**
    * localStorage key the state map is persisted under. Defaults to
    * `"sidebars"`. Change it when several apps share an origin.
    */

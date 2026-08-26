@@ -41,10 +41,12 @@ Read and change the state from any client component:
 
 ```tsx
 "use client"
+
 import { useSidebar } from "next-sidebars"
 
 export function SidebarToggle() {
-  const { open, setOpen, toggle } = useSidebar()
+  const { open, toggle } = useSidebar()
+
   return <button onClick={toggle}>{open ? "Collapse" : "Expand"}</button>
 }
 ```
@@ -65,6 +67,37 @@ const inspector = useSidebar("inspector")
 <aside className="in-data-[sidebar-inspector=closed]:hidden">
 ```
 
+## Mobile sidebars
+
+On mobile a sidebar is usually an overlay — a drawer, a sheet, a full-screen menu — and an overlay shouldn't reopen on reload:
+
+```tsx
+<SidebarProvider sidebars={["desktop", "mobile"]} defaultOpen={{ mobile: false }} persist={{ mobile: false }}>
+```
+
+Style it off `data-sidebar-mobile` like any other sidebar, or hand the state to your overlay component:
+
+```tsx
+"use client"
+
+import { useSidebar } from "next-sidebars"
+import { usePathname } from "next/navigation"
+import { useEffect } from "react"
+
+export function MobileSidebar({ children }: { children: React.ReactNode }) {
+  const { open, setOpen } = useSidebar("mobile")
+  const pathname = usePathname()
+
+  useEffect(() => setOpen(false), [pathname, setOpen]) // close when a link navigates
+
+  return (
+    <Drawer open={open} onOpenChange={setOpen}>
+      {children}
+    </Drawer>
+  )
+}
+```
+
 ## API
 
 `<SidebarProvider>`
@@ -73,6 +106,7 @@ const inspector = useSidebar("inspector")
 | ------------- | ---------------- | --------------------------------------------------------------------------- |
 | `sidebars`    | —                | Named sidebars. Omit for a single default one.                              |
 | `defaultOpen` | `true`           | State before a visitor has toggled anything. A boolean, or a record per id. |
+| `persist`     | `true`           | Whether toggles persist. A boolean, or a record per id.                     |
 | `storageKey`  | `"sidebars"`     | localStorage key.                                                           |
 | `attribute`   | `"data-sidebar"` | Attribute set on `<html>`.                                                  |
 | `nonce`       | —                | CSP nonce for the inline script.                                            |
