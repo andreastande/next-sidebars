@@ -45,12 +45,15 @@ export function createStore(
   storageKey: string,
   persisted: Record<string, boolean>,
 ): SidebarStore {
-  let snapshot = defaults
-  if (typeof window !== "undefined") {
+  const readStored = (): Record<string, unknown> => {
     try {
-      snapshot = mergeStored(defaults, parseStored(window.localStorage.getItem(storageKey)), persisted)
-    } catch {}
+      return parseStored(window.localStorage.getItem(storageKey))
+    } catch {
+      return {}
+    }
   }
+
+  let snapshot = typeof window === "undefined" ? defaults : mergeStored(defaults, readStored(), persisted)
 
   const listeners = new Set<() => void>()
   const emit = () => {
@@ -69,10 +72,7 @@ export function createStore(
 
   const setOpen = (id: string, open: boolean) => {
     if (snapshot[id] === open) return
-    let stored: Record<string, unknown> = {}
-    try {
-      stored = parseStored(window.localStorage.getItem(storageKey))
-    } catch {}
+    const stored = readStored()
     // The snapshot may have missed storage events, so storage stays the
     // authority for every id but the toggled one.
     snapshot = { ...mergeStored(snapshot, stored, persisted), [id]: open }
@@ -89,7 +89,14 @@ export function createStore(
   return {
     subscribe(onChange) {
       listeners.add(onChange)
-      window.addEventListener("storage", onStorage)
+      if (listeners.size === 1) {
+        window.addEventListener("storage", onStorage)
+        // Nothing was listening for "storage", so other tabs' writes were missed. Only
+        // reachable with the provider itself hidden inside <Activity>.
+        snapshot = mergeStored(snapshot, readStored(), persisted)
+      }
+      // <Activity> reconnects a listener without re-rendering it, so it may hold a value from writes it never saw.
+      onChange()
       return () => {
         listeners.delete(onChange)
         if (listeners.size === 0) window.removeEventListener("storage", onStorage)
